@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Github Repo Issues</title>
+
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+  <style>
+    #loadingDiv {
+      top: 0px;
+      bottom: 0px;
+      width: 100%;
+      text-align: center;
+      font-size: 19px;
+      line-height: 30px;
+      margin:0;
+    }
+    #btnFormSubmit{
+      margin: 10px;
+    }
+    .panel-body{
+      padding: 30px;
+    }
+    .panel{
+      position: relative;
+    }
+    #issues-wrap{
+      display: none;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <h1>Github Repository Issues</h1>
+      <form id="github-form" class="form-group">
+        <label for="url">Github Url:</label>
+        <input type="text" name="url" class="form-control" placeholder="URL" required>
+
+        <h4><small>Eg:https://github.com/Shippable/support/</small></h4>
+
+        <button type="submit" class="btn btn-primary pull-right" id="btnFormSubmit">Submit</button>
+      </form>
+    </div>
+
+    <div class="row">
+      <p id="loadingDiv">
+        Loading..
+      </p>
+      <div id="issues-wrap" class="panel panel-default">
+
+        <div class="panel-body">
+          <table id="github-issues" class="table table-striped">
+            <tr>
+              <td>
+                Open issues
+              </td>
+              <td id="openIssues">
+                -
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                Open issues that were opened in the last 24 hours
+              </td>
+              <td id="last24hours">
+                -
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                Open issues that were opened more than 24 hours ago but less than 7 days ago
+              </td>
+              <td id="lessThan7days">
+                -
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                Open issues that were opened more than 7 days ago
+              </td>
+              <td id="moreThan7days">
+                -
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+
+    //On form submission
+    $('#github-form').submit(function(e) {
+      e.preventDefault();
+
+      //Post request with form data
+      $.ajax({
+        url: '/',
+        type: 'post',
+        data: $('#github-form').serialize(),
+        success: function(data) {
+
+          if(data == "Invalid URL")
+            alert(data);
+          else{
+
+            $("#issues-wrap").show();
+
+            //Getting issueCounts for each classification
+            var issueCounts = $("#github-issues").find("td");
+
+            //Feeding response data into issues count
+            issueCounts.each(function(key, value) {
+              if ($(value).attr('id') in data)
+                $(value).html(data[$(value).attr('id')]);
+            });
+          }
+        },
+        error: function() {
+          alert("Something went wrong");
+        }
+      });
+
+    });
+
+
+    //To display loading
+    var $loading = $('#loadingDiv').hide();
+    $(document)
+      .ajaxStart(function() {
+        $loading.show();
+      })
+      .ajaxStop(function() {
+        $loading.hide();
+      });
+  </script>
+</body>
+
+</html>
